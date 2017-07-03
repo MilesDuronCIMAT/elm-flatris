@@ -1,4 +1,4 @@
-# elm-flatris
+# elm-flatris-multiplayer
 A [Flatris](https://github.com/w0rm/elm-flatris) clone in Elm language v0.18, with multiplayer implemented using Google's API Firebase v4.1.3 .
 
 [![Screenshot](elm-flatris.png)](http://unsoundscapes.com/elm-flatris.html)
