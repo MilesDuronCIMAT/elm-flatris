@@ -7,6 +7,8 @@ type Action
     = Init
     | Load String
     | Start
+    | Stop
+    | InitMultiplayer
     | Pause
     | Resume
     | Tick Time
@@ -16,3 +18,4 @@ type Action
     | Rotate Bool
     | Accelerate Bool
     | Noop
+    | Wait

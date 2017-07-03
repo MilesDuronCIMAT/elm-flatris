@@ -97,6 +97,37 @@ renderCount n =
         ]
         [ text (toString n) ]
 
+renderMultiplayerGameButton : Model.State -> Html Action
+renderMultiplayerGameButton state =
+    let
+        ( txt, action ) = ( "New multiplayer game", Actions.InitMultiplayer )
+    in
+        button
+            [ style
+                [ "background" => "#34495f"
+                , "border" => "0"
+                , "bottom" => "30px"
+                , "color" => "#fff"
+                , "cursor" => "pointer"
+                , "font-family" => "Helvetica, Arial, sans-serif"
+                , "font-size" => "18px"
+                , "font-weight" => "300"
+                , "height" => "60px"
+                , "left" => "160px"
+                , "line-height" => "60px"
+                , "outline" => "none"
+                , "padding" => "0"
+                , "position" => "absolute"
+                , "width" => "240px"
+                , "display"
+                => if state == Model.Stopped then
+                    "block"
+                   else
+                    "none"
+                ]
+            , onClick action
+            ]
+            [ text txt ]
 
 renderGameButton : Model.State -> Html Action
 renderGameButton state =
@@ -111,6 +142,9 @@ renderGameButton state =
 
                 Model.Paused ->
                     ( "Resume", Actions.Resume )
+
+                Model.Waiting ->
+                    ( "Waiting player..", Actions.Noop )
     in
         button
             [ style
@@ -164,7 +198,16 @@ renderPanel { score, lines, next, state } =
                 ]
             ]
             [ renderNext next ]
-        , renderGameButton state
+        , div
+            [ style
+                [ 
+                ]
+            ]
+            [ renderMultiplayerGameButton state
+            , renderGameButton state
+            ]
+        
+        
         ]
 
 
@@ -267,6 +310,35 @@ elm-flatris is open source on
 """
         ]
 
+renderWinner : Model -> Html Action
+renderWinner model =
+    div
+        [ style
+            [ "background" => "rgba(236, 240, 241, 0.85)"
+            , "color" => "#34495f"
+            , "font-family" => "Helvetica, Arial, sans-serif"
+            , "font-size" => "40px"
+            , "height" => "75px"
+            , "left" => "330px"
+            , "line-height" => "1.5"
+            , "padding" => "0 15px"
+            , "position" => "absolute"
+            , "top" => "600px"
+            , "width" => "345px"
+            , "display" 
+                => if model.state == Model.Stopped && model.multiplayer then
+                     "block"
+                   else
+                     "none"
+            ]
+        ]
+        [ text (if model.winner then
+                    "You Win!!!"
+                else
+                    "You Loose..."
+                )
+        ]
+
 
 view : Model -> Html Action
 view model =
@@ -287,5 +359,7 @@ view model =
             , renderControls
             , renderPanel model
             , renderInfo model.state
+            , renderWinner model
             ]
         ]
+           

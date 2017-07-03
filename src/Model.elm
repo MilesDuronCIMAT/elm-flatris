@@ -1,4 +1,4 @@
-module Model exposing (Model, State(..), initial, encode, decode)
+module Model exposing (Model, State(..), initial, encode, decode,encodeState, decodeState)
 
 import Json.Decode as Decode
 import Json.Encode as Encode
@@ -12,6 +12,7 @@ type State
     = Paused
     | Playing
     | Stopped
+    | Waiting
 
 
 decodeState : String -> State
@@ -39,6 +40,9 @@ encodeState state =
         Stopped ->
             "stopped"
 
+        Waiting ->
+            "waiting"
+
 
 type alias AnimationState =
     Maybe { active : Bool, elapsed : Time }
@@ -60,6 +64,8 @@ type alias Model =
     , rotation : AnimationState
     , width : Int
     , height : Int
+    , multiplayer : Bool
+    , winner : Bool
     }
 
 
@@ -80,6 +86,8 @@ initial =
     , direction = Nothing
     , width = 10
     , height = 20
+    , multiplayer = False
+    , winner = False
     }
 
 

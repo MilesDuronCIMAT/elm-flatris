@@ -8,6 +8,7 @@ import Grid
 import Random
 import LocalStorage
 import Task exposing (Task)
+import Port
 
 
 getFromStorage : Cmd Action
@@ -24,7 +25,13 @@ getFromStorage =
             )
 
 
-saveToStorage : Model -> ( Model, Cmd Action )
+--saveToStorage : Model -> ( Model, Cmd Action )
+--saveToStorage model =
+    --LocalStorage.set "elm-flatris" (Model.encode 0 model)
+        --|> Task.attempt (always Noop)
+        --|> (,) model
+
+saveToStorage : Model -> (Model, Cmd Action )
 saveToStorage model =
     LocalStorage.set "elm-flatris" (Model.encode 0 model)
         |> Task.attempt (always Noop)
@@ -52,17 +59,55 @@ update action model =
                 , lines = 0
                 , score = 0
                 , grid = Grid.empty
+                , multiplayer = False
               }
             , Cmd.none
             )
-
-        Pause ->
-            saveToStorage { model | state = Paused }
-
-        Resume ->
-            ( { model | state = Playing }
-            , Cmd.none
+        InitMultiplayer ->
+           let
+                ( x, y ) =
+                    Grid.initPosition model.width model.next
+            in
+                (
+                { model 
+                    | lines = 0
+                    , score = 0
+                    , grid = Grid.empty
+                    , multiplayer = True
+                    , position =(x, toFloat y)
+                    , winner = False
+                }
+                , Port.checkState ()
+                )
+        Wait ->
+            ( {model | state = Waiting}
+                , setState Waiting
             )
+        Pause ->   
+            if model.multiplayer then
+                ( {model | state = Paused}
+                , setState Paused
+                )
+            else          
+               saveToStorage { model | state = Paused }
+            
+        Resume ->
+            if model.multiplayer then
+                ( {model | state = Playing}
+                , setState Playing
+                )
+            else
+                ( { model | state = Playing }
+                , Cmd.none
+                )
+
+        Stop ->
+            if model.state == Stopped then
+                (model,Cmd.none)
+            else
+                (  { model | state = Stopped, winner = True}
+                , setState Stopped
+                )
 
         MoveLeft on ->
             ( startMove { model | moveLeft = on }
@@ -93,14 +138,26 @@ update action model =
             ( { model | rotation = Nothing, direction = Nothing, acceleration = False }
             , Cmd.none
             )
-
         Tick time ->
-            model
-                |> animate (min time 25)
-                |> saveToStorage
+            let
 
+                newmodel = model
+                    |> animate (min time 25)
+            in
+                if newmodel.multiplayer then
+                    if newmodel.state == Stopped then
+                        (newmodel,setState Stopped)
+                    else
+                        (newmodel,Cmd.none)
+                else
+                    (saveToStorage newmodel)
         Noop ->
             ( model, Cmd.none )
+
+setState : Model.State-> Cmd msg
+setState state =
+        Port.setState (Model.encodeState state)
+        --Port.writeState (Model.encode 1 model)
 
 
 animate : Time -> Model -> Model

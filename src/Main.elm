@@ -8,6 +8,7 @@ import Html
 import Actions exposing (Action(..))
 import AnimationFrame
 import Task exposing (Task)
+import Port exposing (..)
 
 
 subscriptions : Model -> Sub Action
@@ -19,8 +20,31 @@ subscriptions model =
             Sub.none
         , Keyboard.ups (key False model)
         , Keyboard.downs (key True model)
+        , Port.onStateChanged (stateToAction model)
+        , Port.responseCheckState (checkState)
         ]
+checkState : Bool -> Action
+checkState flag =
+    if flag then
+        Actions.Resume
+    else
+        Actions.Wait
+stateToAction : Model -> String -> Action
+stateToAction model state =
+    if model.multiplayer then
+        case state of
+            "paused" ->
+                Actions.Pause
 
+            "playing" ->
+                Actions.Resume
+
+            "stopped" ->
+                Actions.Stop
+            _->
+                Actions.Noop
+    else
+        Actions.Noop
 
 key : Bool -> Model -> KeyCode -> Action
 key on { rotation, direction, acceleration } keycode =
@@ -49,3 +73,4 @@ main =
         , view = View.view
         , subscriptions = subscriptions
         }
+

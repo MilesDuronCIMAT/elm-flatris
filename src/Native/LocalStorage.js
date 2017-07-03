@@ -1,7 +1,10 @@
 //import Maybe, Native.Scheduler //
+/*$.getScript("firebase.js", function(){
 
+   alert("Script loaded but not necessarily executed.");
+
+});*/
 var _w0rm$elm_flatris$Native_LocalStorage = function() {
-
   function get (key) {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
       var value = localStorage.getItem(key);
